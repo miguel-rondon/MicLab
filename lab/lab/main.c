@@ -31,13 +31,13 @@ int main(void)
 	UCSR0C &= ~(1 << UPM00);
 	UCSR0C &= ~(1 << UPM01);
 
-	// Parada con un bit USB -> 0
+	// Parada con un bit USB -> 0 y si tiene 1 entonces define 2bit de parada
 	UCSR0C &= ~(1 << USBS0);
 
 	// Definir tama�o de datos a 8bits
-	UCSR0C |= (1 << UCSZ00);
-	UCSR0C |= (1 << UCSZ01);
-	UCSR0B &= ~(1 << UCSZ02);
+	UCSR0C |= (1 << UCSZ00);  	// 1
+	UCSR0C |= (1 << UCSZ01);	// 1
+	UCSR0B &= ~(1 << UCSZ02);	// 0
 
 	// Calculo del Baudrate
 	UCSR0A |= (1 << U2X0);
@@ -45,8 +45,7 @@ int main(void)
 	UBRR0 = (F_CPU / 8 / 9600) - 1;
 
 	// Configuracion de pines RX & TX
-	UCSR0B |= (1 << TXEN0);
-	UCSR0B |= (1 << RXEN0);
+	UCSR0B |= (1 << TXEN0)|(1 << RXEN0);
 
 	// Activamos interrupciones
 	sei();
