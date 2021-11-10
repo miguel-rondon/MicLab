@@ -11,15 +11,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-// Para el ejemplo
-#define numeroBits 12
-
 int main(void)
 {
-	// Ejemplo
-	// --> Ejemplo de envio de mensaje
-	char datos[numeroBits] = "Hello World\r";
-
 	// Apagar todas las interrupciones con <avr/interrupt.h>
 	cli();
 
@@ -35,9 +28,9 @@ int main(void)
 	UCSR0C &= ~(1 << USBS0);
 
 	// Definir tama�o de datos a 8bits
-	UCSR0C |= (1 << UCSZ00);  	// 1
-	UCSR0C |= (1 << UCSZ01);	// 1
-	UCSR0B &= ~(1 << UCSZ02);	// 0
+	UCSR0C |= (1 << UCSZ00);  // 1
+	UCSR0C |= (1 << UCSZ01);  // 1
+	UCSR0B &= ~(1 << UCSZ02); // 0
 
 	// Calculo del Baudrate
 	UCSR0A |= (1 << U2X0);
@@ -45,24 +38,25 @@ int main(void)
 	UBRR0 = (F_CPU / 8 / 9600) - 1;
 
 	// Configuracion de pines RX & TX
-	UCSR0B |= (1 << TXEN0)|(1 << RXEN0);
+	UCSR0B |= (1 << TXEN0) | (1 << RXEN0);
 
 	// Activamos interrupciones
 	sei();
 
+	// declaramos la variable
+	char myBuffer = ' ';
+
 	/* Replace with your application code */
 	while (1)
 	{
-		for (int i = 0; i < numeroBits; i++)
-		{
-			// Verificar si la transmicion esta libre
-			while (!(UCSR0A & (1 << UDRE0)))
-				;
+		// Verificar si la transmicion esta libre
+		while (!(UCSR0A & (1 << RXC0)))
+			;
+		myBuffer = UDR0;
 
-			// USAR BUFFER
-			UDR0 = datos[i];
-		}
-
-		_delay_ms(1000);
+		// Escribir el dato
+		while (!(UCSR0A & (1 << UDRE0)))
+			;
+		UDR0 = myBuffer;
 	}
 }
