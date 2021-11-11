@@ -11,6 +11,11 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+// declaramos la variable
+#define numeroBits 14
+char datos[numeroBits] = "\rLED ON/OFF\r";
+char myBuffer = ' ';
+
 int main(void)
 {
 	// Apagar todas las interrupciones con <avr/interrupt.h>
@@ -40,23 +45,43 @@ int main(void)
 	// Configuracion de pines RX & TX
 	UCSR0B |= (1 << TXEN0) | (1 << RXEN0);
 
+	// Activamos la interrupcion
+	UCSR0B |= (1 << RXCIE0);
+
 	// Activamos interrupciones
 	sei();
-
-	// declaramos la variable
-	char myBuffer = ' ';
 
 	/* Replace with your application code */
 	while (1)
 	{
-		// Verificar si la transmicion esta libre
-		while (!(UCSR0A & (1 << RXC0)))
-			;
-		myBuffer = UDR0;
-
-		// Escribir el dato
-		while (!(UCSR0A & (1 << UDRE0)))
-			;
-		UDR0 = myBuffer;
 	}
+}
+
+ISR(USART_RX_vect)
+{
+	myBuffer = UDR0;
+
+	// Verificar si la transmicion esta libre
+	while (!(UCSR0A & (1 << UDRE0)))
+		;
+
+	// Encender led
+	if (myBuffer == 'D')
+	{
+		PORTB^= (1 << 4);
+		
+		for (int i = 0; i < numeroBits; i++)
+		{
+			// Verificar si la transmicion esta libre
+			while (!(UCSR0A & (1 << UDRE0)))
+			;
+
+			// USAR BUFFER
+			UDR0 = datos[i];
+		}
+		
+		_delay_ms(1000);
+	}
+	
+	UDR0 = myBuffer;
 }
