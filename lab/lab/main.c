@@ -10,21 +10,46 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <string.h>
 
-// declaramos la variable
-#define numeroBits 14
-char datos1[numeroBits] = "\rLED ON \r";
-char datos2[numeroBits] = "\rLED OFF\r";
+// Inicializar mis funciones
+void myUart();
+void imprimir(char texto[]);
+void serialLed();
+
+// Mensajes por defecto
+char LedOnTx[] = "\rLED ON\r";
+char LedOffTx[] = "\rLED OFF\r";
+char msm[] = "\rBienvenido\r\r";
 char myBuffer = ' ';
-
-void imprimir();
 
 int main(void)
 {
 	// Apagar todas las interrupciones con <avr/interrupt.h>
 	cli();
 
-	// Modo de uso tipo asyncrono UMLSEL0 -> 00
+	// Iniciar comunicacion UART
+	myUart();
+
+	// Mensaje de inicio
+	imprimir(msm);
+
+	/* Replace with your application code */
+	while (1)
+	{
+	}
+}
+
+ISR(USART_RX_vect)
+{
+	serialLed();
+}
+
+// Mis funciones
+
+void myUart()
+{
+	// Modo de uso tipo "asynchronous fast" UMLSEL0 -> 00
 	UCSR0C &= ~(1 << UMSEL00);
 	UCSR0C &= ~(1 << UMSEL01);
 
@@ -48,56 +73,59 @@ int main(void)
 	// Configuracion de pines RX & TX
 	UCSR0B |= (1 << TXEN0) | (1 << RXEN0);
 
-	// Activamos la interrupcion
+	// Activamos la interrupcion RX
 	UCSR0B |= (1 << RXCIE0);
 
 	// Activamos interrupciones
 	sei();
+}
 
-	/* Replace with your application code */
-	while (1)
+void imprimir(char texto[])
+{
+	/*
+	*	Detectamos el tamaño del texto con la libreria <string.h>
+	*	Es posible usar la "sizeof()" como alternativa
+	*/
+
+	char ntext = (unsigned)strlen(texto);
+
+	for (int i = 0; i < (int)(ntext); i++)
 	{
+		// Verificar si la transmicion esta libre
+		while (!(UCSR0A & (1 << UDRE0)))
+			;
+		UDR0 = texto[i];
 	}
 }
 
-ISR(USART_RX_vect)
+void serialLed()
 {
-	imprimir();
-}
-
-void imprimir()
-{
+	// Almacenamos dato actual
 	myBuffer = UDR0;
 
 	// Verificar si la transmicion esta libre
 	while (!(UCSR0A & (1 << UDRE0)))
 		;
 
-	// Encender led
+	// Si se escribe la letra D, generamos la accion ON/OFF LED
 	if (myBuffer == 'D')
 	{
+		// Encender/Apagar led
 		PORTB ^= (1 << 4);
 
-		for (int i = 0; i < numeroBits; i++)
+		// Mensaje de confirmacion dependiente del puerto
+		if (PORTB & (1 << 4))
 		{
-			// Verificar si la transmicion esta libre
-			while (!(UCSR0A & (1 << UDRE0)))
-				;
-				
-				if (PORTB & (1 << 4)){
-					UDR0 = datos1[i];
-				} else {
-					UDR0 = datos2[i];
-				}
-
-			// USAR BUFFER
-			//
+			imprimir(LedOnTx);
 		}
-
-		_delay_ms(1000);
+		else
+		{
+			imprimir(LedOffTx);
+		}
 	}
 	else
 	{
+		// Escribir registro almacenado
 		UDR0 = myBuffer;
 	}
 }
