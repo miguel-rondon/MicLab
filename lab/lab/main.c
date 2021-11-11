@@ -13,7 +13,8 @@
 
 // declaramos la variable
 #define numeroBits 14
-char datos[numeroBits] = "\rLED ON/OFF\r";
+char datos1[numeroBits] = "\rLED ON \r";
+char datos2[numeroBits] = "\rLED OFF\r";
 char myBuffer = ' ';
 
 void imprimir();
@@ -82,9 +83,15 @@ void imprimir()
 			// Verificar si la transmicion esta libre
 			while (!(UCSR0A & (1 << UDRE0)))
 				;
+				
+				if (PORTB & (1 << 4)){
+					UDR0 = datos1[i];
+				} else {
+					UDR0 = datos2[i];
+				}
 
 			// USAR BUFFER
-			UDR0 = datos[i];
+			//
 		}
 
 		_delay_ms(1000);
