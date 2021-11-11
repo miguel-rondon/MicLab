@@ -16,6 +16,8 @@
 char datos[numeroBits] = "\rLED ON/OFF\r";
 char myBuffer = ' ';
 
+void imprimir();
+
 int main(void)
 {
 	// Apagar todas las interrupciones con <avr/interrupt.h>
@@ -59,6 +61,11 @@ int main(void)
 
 ISR(USART_RX_vect)
 {
+	imprimir();
+}
+
+void imprimir()
+{
 	myBuffer = UDR0;
 
 	// Verificar si la transmicion esta libre
@@ -68,20 +75,22 @@ ISR(USART_RX_vect)
 	// Encender led
 	if (myBuffer == 'D')
 	{
-		PORTB^= (1 << 4);
-		
+		PORTB ^= (1 << 4);
+
 		for (int i = 0; i < numeroBits; i++)
 		{
 			// Verificar si la transmicion esta libre
 			while (!(UCSR0A & (1 << UDRE0)))
-			;
+				;
 
 			// USAR BUFFER
 			UDR0 = datos[i];
 		}
-		
+
 		_delay_ms(1000);
 	}
-	
-	UDR0 = myBuffer;
+	else
+	{
+		UDR0 = myBuffer;
+	}
 }
