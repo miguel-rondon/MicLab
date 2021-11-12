@@ -1,7 +1,13 @@
-Comunicacion UART
+# Laboratorio 2 Microcontroladores Universidad Autonoma de Occidente Santiago de Cali, 2021
 
-https://developer.electricimp.com/resources/uart
+---
 
-Tutorial
+## Integrantes
 
-https://www.youtube.com/watch?v=V60FYBTaqdo
+- Ivan **Camilo** Holguin Perdomo
+- Miguel **Angel** Palomino Campo
+- Miguel **Steven** Rondon Salazar
+
+## Resumen
+
+Se realizo un circuito de aplicacion para comunicacion UART, Conversor analogo a digital y comparador analogico
