@@ -8,3 +8,19 @@ lab/.vs/lab/v14/.atsuo
 Circuito/circuito.pdsprj
 Circuito/Backup Of circuito.pdsbak
 Circuito/circuito.pdsprj
+
+#Build Directories
+[Dd]ebug/
+[Rr]elease/
+
+#Build Results
+*.o
+*.d
+*.eep
+*.elf
+*.hex
+*.map
+*.srec
+
+#User Specific Files
+*.atsuo
